@@ -5,9 +5,11 @@ author        = "Steffen Olson"
 description   = "AOC 2023 Solutions"
 license       = "MIT"
 srcDir        = "src"
+binDir        = "bin"
 installExt    = @["nim"]
 bin           = @[
-  "day01"
+  "day01",
+  "day02"
 ]
 
 
