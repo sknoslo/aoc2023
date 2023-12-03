@@ -9,7 +9,8 @@ binDir        = "bin"
 installExt    = @["nim"]
 bin           = @[
   "day01",
-  "day02"
+  "day02",
+  "day03"
 ]
 
 
