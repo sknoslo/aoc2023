@@ -64,6 +64,51 @@ proc partTwo(almanac: Almanac): string =
         minLocation = lookup
   $minLocation
 
+proc findRanges(ranges: var seq[tuple[a, b: int]], mapping: Mapping): seq[tuple[a, b: int]] =
+  result = newSeq[tuple[a, b: int]]()
+
+  for mappingRange in mapping.ranges:
+    let
+      sa = mappingRange.srcStart
+      sb = mappingRange.srcStart + mappingRange.rangeLen
+      offset = mappingRange.destStart - mappingRange.srcStart
+
+    var nextRanges = newSeq[tuple[a, b: int]]()
+
+    while ranges.len > 0:
+      let range = ranges.pop()
+
+      let
+        before = (a: range.a, b: min(sa, range.b))
+        middle = (a: max(range.a, sa), b: min(range.b, sb))
+        after = (a: max(sb, range.a), b: range.b)
+
+      if before.a < before.b:
+        nextRanges.add(before)
+      if after.a < after.b:
+        nextRanges.add(after)
+      if middle.a < middle.b:
+        result.add((middle.a  + offset, middle.b + offset))
+    ranges = nextRanges
+  result = result.concat(ranges)
+
+
+proc partTwoOptimized(almanac: Almanac): string =
+  var minLocation = high(int)
+
+  for seedRange in almanac.seeds.distribute(almanac.seeds.len div 2, false):
+    var ranges = newSeq[tuple[a, b: int]]()
+    ranges.add((seedRange[0], seedRange[0] + seedRange[1]))
+
+    for mapping in almanac.mappings:
+      ranges = findRanges(ranges, mapping)
+
+    for range in ranges:
+      if range.a < minLocation:
+        minLocation = range.a
+
+  $minLocation
+
 when isMainModule:
   echo "### DAY 05 ###"
 
@@ -73,7 +118,7 @@ when isMainModule:
   echo input
   echo "###  END  ###"
 
-  bench(partOne(parsed), partTwo(parsed)):
+  bench(partOne(parsed), partTwoOptimized(parsed)):
     let
       parts = input.strip.split("\n\n")
       parsed = (seeds: parts[0].replace("seeds: ", "").splitWhitespace.map(parseInt), mappings: parts[1..<parts.len].map(parseMapping))
