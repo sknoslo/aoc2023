@@ -97,11 +97,9 @@ proc partTwo(input: Map): string =
 
   var
     inside = false
-    up = true
     insideCount = 0
   for i in 0..<cleaned.len:
     if i mod input.w == 0:
-      up = true
       inside = false
     var tile = cleaned[i]
     if tile == 'S':
@@ -112,23 +110,12 @@ proc partTwo(input: Map): string =
         insideCount += 1
       else:
         cleaned[i] = 'O'
-    elif tile == '|':
+    elif tile in "|LJ":
       inside = not inside
-    elif tile == 'F':
-      up = true
-    elif tile == 'L':
-      up = false
-    elif up and tile == 'J':
-      inside = not inside
-    elif tile == 'J':
-      up = true
-    elif not up and tile == '7':
-      inside = not inside
-    elif tile == '7':
-      up = false
 
   for y in 0..<input.h:
     echo $cleaned[y * input.w..<y*input.w + input.w]
+
   $insideCount
 
 when isMainModule:
