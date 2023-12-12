@@ -51,17 +51,37 @@ proc partOne(input: seq[ConditionRecord]): string =
         sum += 1
   $sum
 
+var memo: Table[tuple[runlen: seq[int], pattern: string], int]
+proc countSubConditions(runlen: seq[int], pattern: string): int =
+  let key = (runlen, pattern)
+  if memo.hasKey(key):
+    return memo[key]
+
+  if runlen.len == 0:
+    result = if isMatch(pattern, '.'.repeat(pattern.len)): 1 else: 0
+  else:
+    let
+      run = runlen[0]
+      rest = runlen[1..^1]
+      restcount = rest.sum
+      offset = if rest.len > 0: 1 else: 0
+      maxsubstr = pattern.len - restcount - rest.len
+
+    for i in 0..<maxsubstr:
+      let s = '.'.repeat(i) & '#'.repeat(run) & '.'.repeat(offset)
+      if s.len <= pattern.len and isMatch(pattern.substr(0, s.len-1), s):
+        result += countSubConditions(rest, pattern.substr(s.len))
+
+  memo[key] = result
+
 proc partTwo(input: seq[ConditionRecord]): string =
-  return "nope"
   var sum = 0
   for record in input:
     let
       c = record.condition
       unfolded = ConditionRecord(([c, c, c, c, c].join("?"), record.runlen.repeat(5).concat))
 
-    # this is WAAAAAAAAYYYYYY too slow. Need to find a way to count without actually generating strings
-    # dynamic programming???
-    sum += genPossibleConditions(unfolded).len
+    sum += countSubConditions(unfolded.runlen, unfolded.condition)
   $sum
 
 when isMainModule:
